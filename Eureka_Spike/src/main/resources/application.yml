@@ -1,6 +1,6 @@
 # server port
 server:
-  port: 9099
+  port: 8761
 
 # Spring
 spring:
