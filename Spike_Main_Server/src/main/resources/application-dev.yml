@@ -1,11 +1,11 @@
 server:
-  port: 9080
+  port: 8080
   address: localhost
   servlet:
     context-path: /spike
 spring:
   application:
-    name: spike-service
+    name: spike-Main-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://43.137.43.142:3306/cloud_project?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
@@ -51,6 +51,6 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
   instance:
-    instance-id: localhost:9080
+    instance-id: localhost:8080
     prefer-ip-address: true
     hostname: localhost

@@ -1,49 +1,8 @@
 server:
   port: 9080
+  address: localhost
+  servlet:
+    context-path: /spike
 spring:
   profiles:
     active: dev
-  application:
-    name: spike_service
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://xxxxxxxxxxxxxxxx:3306/cloud_project?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
-    username: root
-    password: xxxxxx
-  #其他数据库
-  lvBaseData:
-    type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL
-    url: jdbc:mysql://xxxxxxxxxxxxxxxx:3306/cloud_project?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false   # MySQL
-    username: root
-    password: xxxxxxx
-  #redis
-  redis:
-    host: xxxxxxxxxxxxxxxx
-    port: 6379
-    timeout: 20000
-    pool:
-      max-active: 8
-      min-idle: 0
-      max-idle: 8
-      max-wait: -1
-    password: xxxxxx
-  mail:
-    host: smtp.qq.com
-    port: 465
-    username: xxxxxxx@qq.com #初始邮件地址（发送邮件者）
-    password: xxxxxxxxx  #密码
-    protocol: smtp
-    properties:
-      mail:
-        smtp:
-          auth: true
-          ssl:
-            enable: true
-            socketFactory:
-              class: com.sun.mail.util.MailSSLSocketFactory
-              fallback: false
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka

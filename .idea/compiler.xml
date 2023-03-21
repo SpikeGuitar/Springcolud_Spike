@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="Eureka_Spike" />
         <module name="Server_Spike" />
+        <module name="Spike_Main_Server" />
         <module name="Zuul_Spike" />
       </profile>
     </annotationProcessing>
@@ -17,6 +18,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="Eureka_Spike" options="-parameters" />
       <module name="Server_Spike" options="-parameters" />
+      <module name="Spike_Main_Server" options="-parameters" />
       <module name="Springcolud_Spike" options="" />
       <module name="Zuul_Spike" options="-parameters" />
     </option>
