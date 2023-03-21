@@ -1,0 +1,14 @@
+server:
+  port: 9080
+spring:
+  application:
+    name: spike_service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://43.137.43.142:3306/cloud_project?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: 656803
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

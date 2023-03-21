@@ -11,6 +11,8 @@
     <modules>
         <module>Eureka_Spike</module>
         <module>Eureka_Spike</module>
+        <module>Zuul_Spike</module>
+        <module>Server_Spike</module>
     </modules>
 
     <!-- 1 确定spring boot的版本-->
