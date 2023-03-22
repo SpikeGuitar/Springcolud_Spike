@@ -13,6 +13,7 @@
         <module>Eureka_Spike</module>
         <module>Zuul_Spike</module>
         <module>Server_Spike</module>
+        <module>ServerTest</module>
     </modules>
 
     <!-- 1 确定spring boot的版本-->

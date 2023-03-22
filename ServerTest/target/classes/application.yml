@@ -1,0 +1,8 @@
+server:
+  port: 9081
+  address: localhost
+  servlet:
+    context-path: /spike
+spring:
+  profiles:
+    active: dev
