@@ -1,0 +1,13 @@
+server:
+  port: 8080
+  address: localhost
+  servlet:
+    context-path: /spike
+spring:
+  application:
+    name: Security_spike
+  security:
+    user:
+      name: spike
+      password: 656803
+      roles: admin

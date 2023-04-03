@@ -14,6 +14,7 @@
         <module>Zuul_Spike</module>
         <module>Server_Spike</module>
         <module>ServerTest</module>
+        <module>SpringSecurity</module>
     </modules>
 
     <!-- 1 确定spring boot的版本-->

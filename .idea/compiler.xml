@@ -12,6 +12,7 @@
         <module name="ServerTest" />
         <module name="Spike_Main_Server" />
         <module name="Zuul_Spike" />
+        <module name="SpringSecurity" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -25,6 +26,7 @@
       <module name="Server_Spike" options="-parameters" />
       <module name="Spike_Main_Server" options="-parameters" />
       <module name="Spike_Main_Server2" options="-parameters" />
+      <module name="SpringSecurity" options="-parameters" />
       <module name="Springcolud_Spike" options="" />
       <module name="Zuul_Spike" options="-parameters" />
     </option>
