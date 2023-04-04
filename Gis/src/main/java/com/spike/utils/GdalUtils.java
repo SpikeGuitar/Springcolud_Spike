@@ -2,13 +2,18 @@ package com.spike.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.spike.entity.GisDriverBase;
+import com.spike.entity.GisPictureBase;
 import org.apache.poi.ss.formula.functions.T;
+import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.Driver;
 import org.gdal.gdal.gdal;
 import org.gdal.ogr.ogr;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GdalUtils {
 
@@ -29,38 +34,49 @@ public class GdalUtils {
      * 按照输入的驱动简称 输出驱动的信息和全部方法
      * @param shortName
      */
-    public void printDriverByShortName(String shortName) {
+    public GisDriverBase printDriverByShortName(String shortName) {
+        GisDriverBase gisDriverBase = new GisDriverBase();
         gdal.AllRegister();
         Driver driver = gdal.GetDriverByName(shortName);
-        System.out.println("驱动信息: "+JSON.toJSON(driver));
+        gisDriverBase.setDriverInfo(JSON.toJSON(driver).toString());
         driver.Register();
-        System.out.println("驱动简称："+driver.getShortName());
-        System.out.println("驱动全称："+driver.getLongName());
+        gisDriverBase.setShortName(driver.getShortName());
+        gisDriverBase.setLongName(driver.getLongName());
         Class<?> methods = Driver.class;
         Method[] methodList = methods.getDeclaredMethods();
-        System.out.println("驱动全部方法：");
-        for (Method obj : methodList) {
-            System.out.println(obj+"\n");
+        List<String> list = new ArrayList<>();
+        for (Method obj :methodList) {
+            list.add(obj.getName());
         }
+        gisDriverBase.setMethodList(list);
+        return gisDriverBase;
     }
 
-    public void printPictureInfoBySystemPath(String systemPath) {
+    public GisPictureBase printPictureInfoBySystemPath(String systemPath) {
         String srcFile = systemPath;
         gdal.AllRegister();
+        GisPictureBase gisPictureBase = new GisPictureBase();
         Dataset dataSet = gdal.Open(srcFile);
-        System.out.println("图像数据集："+JSON.toJSONString(dataSet));
+        gisPictureBase.setDataSet(dataSet);
         int width = dataSet.getRasterXSize();
-        System.out.println("宽："+width);
+        gisPictureBase.setWidth(width);
         int height = dataSet.getRasterYSize();
-        System.out.println("高："+height);
+        gisPictureBase.setHeight(height);
         int bandCount = dataSet.getRasterCount();
-        System.out.println("波段数量："+bandCount);
+        gisPictureBase.setBandCount(bandCount);
         double[] geoTransform = dataSet.GetGeoTransform();
-        System.out.println("空间信息："+JSON.toJSON(geoTransform));
+        gisPictureBase.setGeoTransform(geoTransform);
         String proj = dataSet.GetProjection();
-        System.out.println("投影信息："+proj);
+        gisPictureBase.setProjection(proj);
         String describe = dataSet.GetDescription();
-        System.out.println("描述信息："+describe);
+        gisPictureBase.setDescribe(describe);
+        List<Band> bandList = new ArrayList<>();
+        for (int i=1;i<=bandCount;i++) {
+            Band band = dataSet.GetRasterBand(i);
+            bandList.add(band);
+        }
+        gisPictureBase.setBandList(bandList);
+        return gisPictureBase;
     }
 
 }
