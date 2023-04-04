@@ -15,6 +15,7 @@
         <module>Server_Spike</module>
         <module>ServerTest</module>
         <module>SpringSecurity</module>
+        <module>Gis</module>
     </modules>
 
     <!-- 1 确定spring boot的版本-->
