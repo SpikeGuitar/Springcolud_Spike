@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.spike.mapper.UserMapper">
+    <select id="findUserByName" parameterType="java.lang.String" resultType="com.spike.Entity.User">
+        select id,user_name userName,password,enable,locked FROM fot_user where user_name = #{userName}
+    </select>
+</mapper>

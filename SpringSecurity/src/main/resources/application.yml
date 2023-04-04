@@ -11,3 +11,11 @@ spring:
       name: spike
       password: 656803
       roles: admin
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://xxxx:3306/cloud_project?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    username: xx
+    password: xxx
+logging:
+  level:
+    com.spike.Mapper: trace
