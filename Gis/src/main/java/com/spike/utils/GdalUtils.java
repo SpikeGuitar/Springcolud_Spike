@@ -8,7 +8,12 @@ import org.gdal.gdal.Dataset;
 import org.gdal.gdal.Driver;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconstJNI;
+import org.gdal.ogr.DataSource;
+import org.gdal.ogr.Feature;
+import org.gdal.ogr.Geometry;
+import org.gdal.ogr.Layer;
 import org.gdal.ogr.ogr;
+
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -30,7 +35,7 @@ public class GdalUtils {
         gdal.AllRegister();
         int count = ogr.GetDriverCount();
         for (int i = 0; i < count; i++) {
-            org.gdal.ogr.Driver driver = ogr.GetDriver(i);
+            Driver driver = gdal.GetDriver(i);
             System.out.print(JSON.toJSON(driver).toString() + "\n");
         }
         gdal.GDALDestroyDriverManager();
@@ -43,9 +48,8 @@ public class GdalUtils {
      * @return 驱动数据信息
      */
     public GisDriverBase driverByShortName(String shortName) {
+        Driver driver = getDrive(shortName);
         GisDriverBase gisDriverBase = new GisDriverBase();
-        gdal.AllRegister();
-        Driver driver = gdal.GetDriverByName(shortName);
         gisDriverBase.setDriverInfo(JSON.toJSON(driver).toString());
         driver.Register();
         gisDriverBase.setShortName(driver.getShortName());
@@ -104,9 +108,7 @@ public class GdalUtils {
      * @param height 生成图像长
      */
     public void cutPicture(String oldSystemPath, String currentSystemPath, String shortName,int startX,int startY,int width,int height) {
-//        注册驱动
-        gdal.AllRegister();
-        Driver driver = gdal.GetDriverByName(shortName);
+        Driver driver = getDrive(shortName);
 //        获取数据集
         Dataset oldDataSet = gdal.Open(oldSystemPath);
 //        获取波段
@@ -131,5 +133,45 @@ public class GdalUtils {
 //释放资源
         oldDataSet.delete();
         currentDataset.delete();
+    }
+
+    /**
+     * 获取整个图层的json数据
+     *
+     * @param strVectorFile 文件系统路径
+     * @return
+     */
+    public String openShp(String strVectorFile,String shpDriverName) {
+        Driver shpDriver =getDrive(shpDriverName);
+        if (shpDriver == null) {
+            throw new RuntimeException(shpDriverName+ " 驱动不可用！\n");
+        }
+        //获取数据源
+        DataSource shpDataSource = ogr.Open(strVectorFile,0);
+        if (shpDataSource == null)
+        {
+            throw new RuntimeException("打开文件【"+ strVectorFile + "】失败！" );
+        }
+        //获取图层0
+        Layer shpLayer = shpDataSource.GetLayerByIndex(0);
+        if (shpLayer == null)
+        {
+            throw new RuntimeException("获取shp图层失败！\n");
+        }
+        //转化为json
+        Feature feature = shpLayer.GetNextFeature();
+        Geometry geometry = feature.GetGeometryRef();
+        String json = geometry.ExportToJson();
+        shpDataSource.delete();
+        gdal.GDALDestroyDriverManager();
+        return json;
+    }
+
+    public Driver getDrive(String shortName){
+        //准备，注册驱动
+        gdal.AllRegister();;
+        //获取驱动
+        Driver driver = gdal.GetDriverByName(shortName);
+        return driver;
     }
 }
