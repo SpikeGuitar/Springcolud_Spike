@@ -16,9 +16,6 @@
         <module name="Zuul_Spike" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="Spike_Main_Server2" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
@@ -27,7 +24,6 @@
       <module name="ServerTest" options="-parameters" />
       <module name="Server_Spike" options="-parameters" />
       <module name="Spike_Main_Server" options="-parameters" />
-      <module name="Spike_Main_Server2" options="-parameters" />
       <module name="SpringSecurity" options="-parameters" />
       <module name="Springcolud_Spike" options="" />
       <module name="Zuul_Spike" options="-parameters" />

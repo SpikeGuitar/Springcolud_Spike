@@ -38,6 +38,21 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-shapefile</artifactId>
+            <version>18.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-swing</artifactId>
+            <version>18.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-epsg-hsql</artifactId>
+            <version>18.1</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>

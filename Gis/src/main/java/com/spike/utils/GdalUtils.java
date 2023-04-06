@@ -1,24 +1,26 @@
 package com.spike.utils;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.spike.entity.GisDriverBase;
 import com.spike.entity.GisPictureBase;
-import org.apache.poi.ss.formula.functions.T;
 import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.Driver;
 import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
-import org.gdal.gdalconst.gdalconstConstants;
 import org.gdal.gdalconst.gdalconstJNI;
 import org.gdal.ogr.ogr;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
+/**
+ * @PACKAGE_NAME: com.spike.utils
+ * @NAME: GdalUtils
+ * @USER: spike
+ * @DATE: 2023/4/4 11:57
+ * @PROJECT_NAME: Springcolud_Spike
+ */
 public class GdalUtils {
 
     /**
