@@ -1,5 +1,7 @@
 package com.spike.utils;
 
+import com.alibaba.fastjson.JSON;
+import lombok.extern.log4j.Log4j;
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -32,6 +34,7 @@ import java.util.Map;
  * @DATE: 2023/4/6 11:57
  * @PROJECT_NAME: Springcolud_Spike
  */
+@Log4j
 public class GeoToolUtils {
 
     /**
@@ -40,13 +43,12 @@ public class GeoToolUtils {
      * @param filePath 文件系统地址
      * @throws IOException
      */
-    public void readShpInfo(String filePath) throws IOException {
-        long startTime = System.currentTimeMillis();
+    public List<Map<String, Object>> readShpInfo(String filePath) throws IOException {
         //加载文件
         File file = new File(filePath);
         if (!file.exists()) {
-            System.out.println("文件不存在");
-            return;
+            log.info("文件不存在");
+            return null;
         }
         //map记录shapefile key-value数据
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -70,14 +72,12 @@ public class GeoToolUtils {
                     field = field.equals("the_geom") ? "wkt" : field;
                     byte[] bytes = value.getBytes("iso8859-1");
                     value = new String(bytes, "utf-8");
-                    System.out.println(new String(field.getBytes("iso8859-1"), "utf-8") + "==" + value);
                     data.put(field, value);
                 }
             }
             list.add(data);
         }
-        long endTime = System.currentTimeMillis();
-        System.out.println("当前程序耗时：" + (endTime - startTime) + "ms");
+        return list;
     }
 
     /**
