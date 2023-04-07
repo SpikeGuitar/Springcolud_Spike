@@ -3,6 +3,7 @@ package com.spike.Controller;
 import com.alibaba.fastjson.JSON;
 import com.spike.utils.GdalUtils;
 import com.spike.utils.GeoToolUtils;
+import com.spike.utils.ParamCheckUtils;
 import com.vividsolutions.jts.geom.Geometry;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,10 +65,20 @@ public class GIsController {
     @ApiOperation("getMapContentByPath")
     @PostMapping("/getMapContentByPath")
     public void getMapContentByPath(@RequestBody Map<String, Object> map, HttpServletResponse response) throws Exception {
+        List<String> stringList = new ArrayList<>();
+        stringList.add("filePath");
+        stringList.add("color");
+        stringList.add("formatName");
+        boolean flag = ParamCheckUtils.checkMapParamHasNull(map,stringList);
+        if(!flag){
+            log.error("参数错误,请检查");
+            return;
+        }
         String filePath = map.get("filePath").toString();
         String destImagePath = map.get("destImagePath").toString();
         String color = map.get("color").toString();
+        String formatName = map.get("formatName").toString();
         GeoToolUtils geoToolUtils = new GeoToolUtils();
-        geoToolUtils.shp2Image(filePath,destImagePath,color,response);
+        geoToolUtils.shp2Image(filePath,destImagePath,color,formatName,response);
     }
 }
