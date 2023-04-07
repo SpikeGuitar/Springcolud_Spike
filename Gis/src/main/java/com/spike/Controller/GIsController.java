@@ -6,15 +6,13 @@ import com.spike.utils.GeoToolUtils;
 import com.vividsolutions.jts.geom.Geometry;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.geotools.map.MapContent;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.File;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -62,4 +60,13 @@ public class GIsController {
         geoToolUtils.writeShpByGeom(map,geometry);
     }
 
+    @ApiOperation("getMapContentByPath")
+    @PostMapping("/getMapContentByPath")
+    public void getMapContentByPath(@RequestBody Map<String, Object> map, HttpServletResponse response) throws Exception {
+        String filePath = map.get("filePath").toString();
+        String destImagePath = map.get("destImagePath").toString();
+        String color = map.get("color").toString();
+        GeoToolUtils geoToolUtils = new GeoToolUtils();
+        geoToolUtils.shp2Image(filePath,destImagePath,color,response);
+    }
 }

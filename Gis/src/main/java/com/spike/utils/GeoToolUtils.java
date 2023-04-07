@@ -1,11 +1,9 @@
 package com.spike.utils;
 
-import com.alibaba.fastjson.JSON;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.WKTReader;
 import lombok.extern.log4j.Log4j;
-
 import org.geotools.data.FeatureWriter;
 import org.geotools.data.FileDataStore;
 import org.geotools.data.FileDataStoreFinder;
@@ -17,10 +15,12 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTSFactoryFinder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.map.FeatureLayer;
 import org.geotools.map.Layer;
 import org.geotools.map.MapContent;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.geotools.renderer.lite.StreamingRenderer;
 import org.geotools.styling.SLD;
 import org.geotools.styling.Style;
 import org.geotools.swing.JMapFrame;
@@ -29,12 +29,17 @@ import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
-
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -141,7 +146,7 @@ public class GeoToolUtils {
         feature.setAttribute("the_geom", geometry);
         feature.setAttribute("id",adcode);
         feature.setAttribute("des", des);
-        System.out.println("========= 写入【"+geometry.getGeometryType()+"】成功 ！=========");
+        log.info("========= 写入【"+geometry.getGeometryType()+"】成功 ！=========");
         // 写入
         writer.write();
         // 关闭
@@ -203,5 +208,105 @@ public class GeoToolUtils {
         }
         return null;
     }
+
+    /**
+     * 打开shp文件,获取地图内容
+     * @param filePath  文件路径
+     * @param isOpenByChoose 是否自定义打开shp文件
+     * @param color 颜色
+     * @throws Exception
+     */
+    public MapContent getMapContentByPath(String filePath,boolean isOpenByChoose,String color ) throws  Exception{
+        File file;
+        if(isOpenByChoose){
+            // 1.1、 数据源选择 shp扩展类型的
+            file = JFileDataStoreChooser.showOpenFile("shp", null);
+        }else{
+            // 1.2、根据路径拿到文件对象
+            file = new File(filePath);
+        }
+        if(file==null){
+            return null;
+        }
+        SimpleFeatureSource featureSource = getFeatureSource(file);
+        // 5、创建映射内容，并将我们的shapfile添加进去
+        MapContent mapContent = new MapContent();
+        // 6、设置容器的标题
+        mapContent.setTitle("Appleyk's GeoTools");
+        Color color1;
+        if(color == null || "".equals(color)){
+            color1 = Color.BLACK;
+        }else if("red".equals(color)){
+            color1 = Color.RED;
+        }else if("green".equals(color)){
+            color1 = Color.GREEN;
+        }else if("blue".equals(color)){
+            color1 = Color.BLUE;
+        }else{
+            color1 = Color.ORANGE;
+        }
+        // 7、创建简单样式 【颜色填充】
+        Style style = SLD.createSimpleStyle(featureSource.getSchema(),color1);
+        // 8、显示【shapfile地理信息+样式】
+        Layer layer = new FeatureLayer(featureSource, style);
+        // 9、将显示添加进map容器
+        mapContent.addLayer(layer);
+        return  mapContent;
+    }
+
+    /**
+     * shp文件转Image【格式定png】
+     * @param shpFilePath shp目标文件
+     * @param destImagePath 转成图片的文件 == 如果没有，转成的图片写进response输出流里
+     * @param response 响应流
+     * @throws Exception
+     */
+    public void shp2Image(String shpFilePath,String destImagePath,String color, HttpServletResponse response) throws  Exception{
+        // 流渲染器
+        StreamingRenderer renderer = new StreamingRenderer();
+        MapContent mapContent = getMapContentByPath(shpFilePath,false,color);
+        renderer.setMapContent(mapContent);
+        // Rectangle图层的大小 图层x轴平移 图层y轴平移 width图层宽 height图层高
+        Rectangle imageBounds = new Rectangle(0, 0, 2000, 2000);
+        // BufferedImage图片的大小 width图片宽 height图片高
+        BufferedImage dumpImage = new BufferedImage(2000, 2000, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = dumpImage.createGraphics();
+        // fillRect背景底片的大小 width背景宽 height背景高
+        g2d.fillRect(0, 0, 2000, 2000);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        SimpleFeatureSource featureSource = getFeatureSource(new File(shpFilePath));
+        ReferencedEnvelope bounds = featureSource.getBounds();
+        renderer.paint(g2d, imageBounds, bounds);
+        g2d.dispose();
+        if(destImagePath == null || "".equals(destImagePath)){
+            ImageIO.write(dumpImage, "png", response.getOutputStream());
+        }else{
+            ImageIO.write(dumpImage, "png", new File(destImagePath+".png"));
+        }
+    }
+
+    /**
+     * 通过shp文件获取 SimpleFeatureSource
+     *
+     * @param file shp文件
+     * @return SimpleFeatureSource
+     * @throws IOException
+     */
+    private SimpleFeatureSource getFeatureSource(File file) throws IOException {
+        // 2、得到打开的文件的数据源
+        FileDataStore store = FileDataStoreFinder.getDataStore(file);
+        // 3、设置数据源的编码，防止中文乱码
+        ((ShapefileDataStore)store).setCharset(Charset.forName("UTF-8"));
+        /**
+         * 使用FeatureSource管理要素数据
+         * 使用Style（SLD）管理样式
+         * 使用Layer管理显示
+         * 使用MapContent管理所有地图相关信息
+         */
+        // 4、以java对象的方式访问地理信息 --    简单地理要素
+        SimpleFeatureSource featureSource = store.getFeatureSource();
+        return featureSource;
+    }
+
 
 }

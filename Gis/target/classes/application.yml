@@ -1,0 +1,8 @@
+server:
+  port: 8080
+  address: localhost
+  servlet:
+    context-path: /spike
+spring:
+  application:
+    name: spike_Gis_service
