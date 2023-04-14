@@ -216,7 +216,7 @@ public class GeoToolUtils {
      * @param color 颜色
      * @throws Exception
      */
-    public MapContent getMapContentByPath(String filePath,boolean isOpenByChoose,String color ) throws  Exception{
+    public MapContent getMapContentByPath(SimpleFeatureSource featureSource,String filePath,boolean isOpenByChoose,String color ) throws  Exception{
         File file;
         if(isOpenByChoose){
             // 1.1、 数据源选择 shp扩展类型的
@@ -228,7 +228,6 @@ public class GeoToolUtils {
         if(file==null){
             return null;
         }
-        SimpleFeatureSource featureSource = getFeatureSource(file);
         // 5、创建映射内容，并将我们的shapfile添加进去
         MapContent mapContent = new MapContent();
         // 6、设置容器的标题
@@ -267,7 +266,8 @@ public class GeoToolUtils {
     public void shp2Image(String shpFilePath,String destImagePath,String color,String formatName ,HttpServletResponse response) throws  Exception{
         // 流渲染器
         StreamingRenderer renderer = new StreamingRenderer();
-        MapContent mapContent = getMapContentByPath(shpFilePath,false,color);
+        SimpleFeatureSource featureSource = getFeatureSource(new File(shpFilePath));
+        MapContent mapContent = getMapContentByPath(featureSource,shpFilePath,false,color);
         renderer.setMapContent(mapContent);
         // Rectangle图层的大小 图层x轴平移 图层y轴平移 width图层宽 height图层高
         Rectangle imageBounds = new Rectangle(0, 0, 2400, 2000);
@@ -277,14 +277,13 @@ public class GeoToolUtils {
         // fillRect背景底片的大小 width背景宽 height背景高
         g2d.fillRect(0, 0, 2400, 2000);
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        SimpleFeatureSource featureSource = getFeatureSource(new File(shpFilePath));
         ReferencedEnvelope bounds = featureSource.getBounds();
         renderer.paint(g2d, imageBounds, bounds);
         g2d.dispose();
         if(destImagePath == null || "".equals(destImagePath)){
             ImageIO.write(dumpImage, formatName, response.getOutputStream());
         }else{
-            ImageIO.write(dumpImage, formatName, new File(destImagePath+".png"));
+            ImageIO.write(dumpImage, formatName, new File(destImagePath+"."+formatName));
         }
     }
 
