@@ -1,4 +1,4 @@
-package com.spike.Entity;
+package com.spike.entity;
 
 import lombok.Data;
 import org.apache.catalina.Role;

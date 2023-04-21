@@ -1,4 +1,4 @@
-package com.spike.Config;
+package com.spike.config;
 
 import org.springframework.context.annotation.Configuration;
 

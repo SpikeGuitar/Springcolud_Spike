@@ -1,4 +1,4 @@
-package com.spike.Config;
+package com.spike.config;
 
 import com.spike.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

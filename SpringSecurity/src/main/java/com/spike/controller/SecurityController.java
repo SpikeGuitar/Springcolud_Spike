@@ -1,4 +1,4 @@
-package com.spike.Controller;
+package com.spike.controller;
 
 import com.spike.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;

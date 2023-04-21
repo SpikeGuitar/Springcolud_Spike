@@ -1,4 +1,4 @@
-package com.spike.Controller;
+package com.spike.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.spike.utils.GdalUtils;

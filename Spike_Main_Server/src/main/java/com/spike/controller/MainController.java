@@ -1,4 +1,4 @@
-package com.spike.Controller;
+package com.spike.controller;
 
 import com.spike.UtilClass.ResponseResult;
 import io.swagger.annotations.ApiOperation;

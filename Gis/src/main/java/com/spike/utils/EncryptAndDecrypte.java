@@ -15,8 +15,8 @@ import java.util.Base64;
  */
 
 public class EncryptAndDecrypte {
-    static String strKey = "fdbc4y6hdhKlf4M3mjgGrMC3PbryXrxw";
-    static String strIV = "RfnMfrpec48=";
+    static String strKey = "yukl4y6scvelf5Y6bnhGrMC3PbryXrxw";
+    static String strIV = "RooMfrffc48=";
 
     /**
      * 默认加密字符串。

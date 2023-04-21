@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.spike.mapper.UserMapper">
+    <select id="queryUser" resultType="com.spike.entity.SysUser">
+        SELECT
+            "Id",
+            "UserName",
+            "Password",
+            "Role",
+            "Name",
+            "Phone",
+            "Company"
+        FROM
+            sys_user
+        WHERE
+            "UserName" = #{userName}
+            AND "Password" = #{password}
+    </select>
+
+    <select id="queryUserMaxId" resultType="java.lang.Integer">
+        SELECT max("Id")+1 FROM sys_user
+    </select>
+
+    <delete id="addUser">
+        insert into sys_user("Id","UserName","Password","Role") values (#{newId},#{userName},#{password},#{roleName})
+    </delete>
+
+    <select id="queryUserByName" resultType="java.util.Map">
+        SELECT
+            "Id",
+            "UserName",
+            "Role",
+            "Name",
+            "Phone",
+            "Company"
+        FROM
+            sys_user
+        WHERE
+            "UserName" = #{userName}
+    </select>
+
+    <delete id="delete">
+        delete from sys_user where "Id"=#{id}
+    </delete>
+
+    <select id="queryUserById" resultType="java.util.Map">
+        SELECT
+            "Id",
+            "UserName",
+            "Password",
+            "Role",
+            "Name",
+            "Phone",
+            "Company"
+        FROM
+            sys_user
+        WHERE
+            "Id" = #{id}
+    </select>
+
+    <update id="update">
+        update sys_user
+        set
+        "Id" =#{id}
+        <if test="name !=null and name != ''">
+        ,"Name" = #{name}
+        </if>
+        <if test="phone !=null and phone != ''">
+            ,"Phone"=#{phone}
+        </if>
+        <if test="company !=null and company != ''">
+            ,"Company"=#{company}
+        </if>
+        <if test="roleName !=null and roleName != ''">
+            ,"Role"=#{roleName}
+        </if>
+        <if test="password !=null and password != ''">
+            ,"Password"=#{password}
+        </if>
+        where
+        "Id" =#{id}
+    </update>
+
+    <select id="list" resultType="java.util.Map">
+        SELECT
+        count(*) over () as total,
+            "Id",
+            "UserName",
+            '******' "Password",
+            "Role",
+            "Name",
+            "Phone",
+            "Company"
+        FROM
+            sys_user
+        ORDER BY
+            "Id"
+        OFFSET
+            ( #{ pageIndex }- 1 ) *#{ pageSize }
+        LIMIT #{ pageSize}
+    </select>
+</mapper>

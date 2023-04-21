@@ -1,6 +1,6 @@
 package com.spike.mapper;
 
-import com.spike.Entity.User;
+import com.spike.entity.User;
 
 public interface UserMapper {
     User findUserByName(String userName);
