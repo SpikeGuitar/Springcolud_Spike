@@ -1,5 +1,6 @@
 package com.spike.mapper;
 
+import com.spike.entity.Field;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -15,4 +16,8 @@ import java.util.Map;
 @Mapper
 public interface CoreMapper {
     List<Map<String,Object>> getTableHeadPGSql(String tableName);
+
+    List<Map<String, Object>> checkTableNameAbsent(String tableName);
+
+    Integer addTable(String dataName, String tableName, List<Field> addFieldList);
 }

@@ -1,24 +1,19 @@
 package com.spike.controller;
 
 import cn.dev33.satoken.util.SaResult;
+import com.spike.entity.Field;
 import com.spike.service.CoreService;
-import com.spike.utils.ParamCheckUtils;
 import com.spike.utils.ResultUtil;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -53,5 +48,11 @@ public class CoreController {
         List<Map<String, Object>> listMap = coreService.getTableHeadOrderBy(tableName, orderList);
         return ResultUtil.data(listMap);
     }
+
+
+    public SaResult saveTable(String id,String dataName, String tableName, List<Field> addFieldList, List<Field> updateFieldList, List<Field> deletedFieldList){
+       return coreService.saveTable(id, dataName,tableName,addFieldList,updateFieldList,deletedFieldList);
+    }
+    
 
 }

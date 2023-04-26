@@ -6,3 +6,4 @@ server:
 spring:
   application:
     name: spike_Gis_service
+tableName: fot_

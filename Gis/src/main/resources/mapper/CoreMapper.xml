@@ -14,4 +14,25 @@
             AND col_description ( A.attrelid, A.attnum ) IS NOT NULL
             AND C.relname = #{tableName}
     </select>
+
+    <select id="checkTableNameAbsent" resultType="java.util.Map">
+        SELECT tablename FROM pg_tables WHERE tablename NOT LIKE 'pg%' AND tablename NOT LIKE 'sql_%' and tablename =#{tableName} ORDER  BY  tablename;
+    </select>
+
+    <update id="addTable">
+        CREATE TABLE "${dataName}"."${tableName}" (
+        <foreach collection="addFieldList" item="item" separator=",">
+            "${item.key}" int4
+            <if test="item.isNotNull">
+            NOT NULL
+            </if> ,
+            <if test="item.isPkey">
+                CONSTRAINT "test_pkey" PRIMARY KEY ("id")
+            </if>
+        </foreach>
+        )
+        <foreach collection="addFieldList" item="item" separator=";">
+            COMMENT ON COLUMN "${dataName}"."${tableName}"."${item.key}" IS #{item.name}
+        </foreach>
+    </update>
 </mapper>
