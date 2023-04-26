@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.spike.mapper.CoreMapper">
+    <select id="getTableHeadPGSql" resultType="java.util.Map">
+        SELECT
+            A.attname AS "key",
+            col_description ( A.attrelid, A.attnum ) AS "label"
+        FROM
+            pg_class AS C,
+            pg_attribute AS A
+        WHERE
+            A.attrelid = C.oid
+            AND A.attnum > 0
+            AND col_description ( A.attrelid, A.attnum ) IS NOT NULL
+            AND C.relname = #{tableName}
+    </select>
+</mapper>

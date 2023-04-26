@@ -28,7 +28,7 @@ public class TwoSwitchPermissionAspect  {
     private JdbcTemplate jdbcTemplate;
 
     //List方法切点
-    @Pointcut("execution(* com.spike.util.Controller.UtilController.*(..))")
+    @Pointcut("execution(* com.spike.util.controller.UtilController.*(..))")
     void powerCheck() {
     }
 
