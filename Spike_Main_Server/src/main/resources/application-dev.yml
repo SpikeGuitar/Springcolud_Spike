@@ -10,14 +10,14 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://43.137.43.142:3306/cloud_project?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
     username: root
-    password: 656803
+    password: xxxxx
   #其他数据库
   lvBaseData:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL
     url: jdbc:mysql://43.137.43.142:3306/cloud_project?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&useSSL=false   # MySQL
     username: root
-    password: 656803
+    password: xxxxx
   #redis
   redis:
     host: 43.137.43.142
@@ -28,12 +28,12 @@ spring:
       min-idle: 0
       max-idle: 8
       max-wait: -1
-    password: 656803
+    password: xxxxx
   mail:
     host: smtp.qq.com
     port: 465
     username: 2926169741@qq.com #初始邮件地址（发送邮件者）
-    password: ouiejfkeeypndccd  #密码
+    password: xxxx  #密码
     protocol: smtp
     properties:
       mail:
