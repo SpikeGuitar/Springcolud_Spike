@@ -2,12 +2,13 @@ package spike.controller;
 
 
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import spike.schedule.NatSchedule;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,8 +19,6 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @PACKAGE_NAME: com.example.controller
@@ -28,48 +27,21 @@ import java.util.Map;
  * @DATE: 2023/5/8 8:57
  * @PROJECT_NAME: SendAlertMsg
  */
+@Slf4j
 @RestController
 @RequestMapping("Nat")
 public class CheckSyncStateController {
-
-    private static Map<String, Object> NAT_MAP = new HashMap<>();
-
+    
     /**
      * 查询程序运行状态
      */
     @ApiOperation(value = "查询程序运行状态", tags = "CheckSyncStateController 检查同步状态")
     @RequestMapping(value = "/getNatMap", method = RequestMethod.GET)
-    public Object getSyncState(HttpServletRequest request, @RequestParam(required = false, value = "key") String key,@RequestParam(required = false, value = "ip") String ip) {
-        if (key.isEmpty()) {
-            return NAT_MAP;
+    public Object getSyncState( @RequestParam(required = false, value = "key") String key) {
+        if(!key.isEmpty()){
+            return NatSchedule.NAT_MAP.get(key);  
         }
-        String client_ip = request.getRemoteAddr();
-        Integer client_port = request.getRemotePort();
-        String client_url = ip+"/"+client_ip + "/" + client_port.toString();
-        if (NAT_MAP.get(key) != null) {
-            String[] list = (String[]) NAT_MAP.get(key);
-            boolean flag = Boolean.TRUE;
-            for(String str:list){
-                if(str==null||str.isEmpty()){
-                    continue;
-                }
-                String[] urlArr = str.split("/");
-                String uuid = urlArr[0]+"/"+urlArr[1];
-                if(uuid.equals(ip+"/"+client_ip)){
-                    flag = Boolean.FALSE;
-                    break;
-                }
-            }
-            if(flag){
-                list[1] = list[0];
-                list[0] = client_url;
-            }
-        } else {
-            String[] list = new String[2];
-            list[0] = client_url;
-            NAT_MAP.put(key, list);
-        }
-        return NAT_MAP.get(key);
+        return NatSchedule.NAT_MAP;
     }
 
     /**
@@ -86,16 +58,17 @@ public class CheckSyncStateController {
      */
     @ApiOperation(value = "udp打洞", tags = "CheckSyncStateController 检查同步状态")
     @RequestMapping(value = "/sendToUdp", method = RequestMethod.GET)
-    public String sendToUdp(@RequestParam(value = "client_ip") String client_ip, @RequestParam(value = "client_port") Integer client_port) throws IOException {
-        sendUdp(client_ip, client_port);
+    public String sendToUdp(@RequestParam(value = "key") String key,@RequestParam(value = "client_ip") String client_ip, @RequestParam(value = "client_port") Integer client_port) throws IOException {
+        sendUdp(key,client_ip, client_port);
         return "打洞完成";
     }
-
-    public static void sendUdp(String client_ip, Integer client_port) throws IOException {
+    
+    public static void sendUdp(String key,String client_ip, Integer client_port) throws IOException {
         // 1，建立udp的socket服务。
-        DatagramSocket ds = new DatagramSocket();//指定发送端口，这个可以不指定，系统会随机分配。
+        DatagramSocket ds = new DatagramSocket(7090);//指定发送端口，这个可以不指定，系统会随机分配。
+        String ipV4 = InetAddress.getLocalHost().getHostAddress();
         // 2，明确要发送的具体数据。
-        String text = "udp传输 nat打洞";
+        String text = key+":"+ipV4;
         byte[] buf = text.getBytes();
         // 3，将数据封装成了数据包。
         DatagramPacket dp = new DatagramPacket(buf, buf.length, InetAddress.getByName(client_ip), client_port);

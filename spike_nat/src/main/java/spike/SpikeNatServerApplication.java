@@ -8,6 +8,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 public class SpikeNatServerApplication {
     public static void main(String[] args) {
-        SpringApplication.run(SpikeNatServerApplication.class,args);
+        SpringApplication.run(SpikeNatServerApplication.class, args);
     }
 }
