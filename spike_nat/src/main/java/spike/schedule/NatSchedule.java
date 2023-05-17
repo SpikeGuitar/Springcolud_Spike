@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,13 +41,13 @@ public class NatSchedule {
     public static Map<String, Object> NAT_MAP = new HashMap<>();
 
     //每1分钟执行一次
-    @Scheduled(cron = "0/1 * * * * ?")
+    @Scheduled(cron = "0 0/15 * * * ?")
     private void SendUdp() throws IOException {
         if (!IS_SERVER) {
             String ipV4 = InetAddress.getLocalHost().getHostAddress();
             // 客户段发送upd请求到服务端(服务端记录 客户端内网ip/外网ip/外网端口)
             String[] ipArr = TAR_URL.split(":");
-            log.info("向服务端"+ipArr[0]+":10000"+"发送upd");
+            log.info("向服务端" + ipArr[0] + ":10000" + "发送upd");
             sendUdp(KEY, ipArr[0], 10000);
             //查询 相同key的两个客户段nat信息
             String result = doGet("http://" + TAR_URL + "/Nat/getNatMap?key=" + KEY);
@@ -62,7 +63,7 @@ public class NatSchedule {
                 if (!strArr[0].equals(ipV4)) {
                     //upd打洞
                     log.info("upd打洞 ip{} : 端口{}", strArr[1], Integer.valueOf(strArr[2]));
-                    log.info("向客户端"+strArr[1]+":"+strArr[2]+"发送upd");
+                    log.info("向客户端" + strArr[1] + ":" + strArr[2] + "发送upd");
                     sendUdp(KEY, strArr[1], Integer.valueOf(strArr[2]));
                 }
             }
@@ -70,8 +71,8 @@ public class NatSchedule {
     }
 
     //每1秒钟执行一次
-    @Scheduled(cron = "*/1 * * * * ?")
-    private void receiveUpd() throws IOException {
+    @Scheduled(cron = "0/1 * * * * ?")
+    private void receiveUpd() {
         receiveUpdMsg();
     }
 
@@ -80,40 +81,43 @@ public class NatSchedule {
      *
      * @throws IOException
      */
-    public void receiveUpdMsg() throws IOException {
-        //创建接收端的Socket对象(DatagramSocket)
-        //DatagramSocket(int port)构造数据报套接字并将其绑定到本地主机上的指定端口
-        DatagramSocket ds;
-        if(IS_SERVER) {
-            ds = new DatagramSocket(10000);
-        }else {
-            ds = new DatagramSocket(9999);
-        }
+    public void receiveUpdMsg() {
         //创建一个数据包，用于接收数据
         //DatagramPacket(byte[] buf,int length)构造一个DatagramPacket用于接收长度为length的数据包
         byte[] bytes = new byte[1024];
         DatagramPacket dp = new DatagramPacket(bytes, bytes.length);
-        //调用DatagramSocket对象的方法接收数据
-        ds.receive(dp);
-        InetAddress address = dp.getAddress();
-        int port = dp.getPort();
-        String url = address.getHostAddress() + ":" + port;
-        log.info("收到->" + url + "的消息：");
-        //解析数据包，并把数据在控制台显示
-        //byte[] getData() 返回数据缓冲区
-        byte[] datas = dp.getData();
-        //int getLength()返回要发送的数据的长度或接收到的数据的长度
-        int length = dp.getLength();
-        String dataString = new String(datas, 0, length);
-        String client_url = dataString + ":" + url;
-        log.info("收到upd请求地址{}", client_url);
-        String[] clientArr = client_url.split(":");
-        if(IS_SERVER) {
-            String key = clientArr[0];
-            putNatMap(key, clientArr[1] + ":" + url);
+        //创建接收端的Socket对象(DatagramSocket)
+        //DatagramSocket(int port)构造数据报套接字并将其绑定到本地主机上的指定端口
+        DatagramSocket ds=null;
+        try {
+            if (IS_SERVER) {
+                ds = new DatagramSocket(10000);
+            } else {
+                ds = new DatagramSocket(9999);
+            }
+            //调用DatagramSocket对象的方法接收数据
+            ds.setSoTimeout(1000);
+            ds.receive(dp);
+            InetAddress address = dp.getAddress();
+            int port = dp.getPort();
+            String url = address.getHostAddress() + ":" + port;
+            //解析数据包，并把数据在控制台显示
+            //byte[] getData() 返回数据缓冲区
+            byte[] datas = dp.getData();
+            //int getLength()返回要发送的数据的长度或接收到的数据的长度
+            int length = dp.getLength();
+            String dataString = new String(datas, 0, length);
+            String client_url = dataString + ":" + url;
+            log.info("来自Nat端 **** " + url + " **** 的消息："+url+"\n收到upd请求信息 **** {} **** ", dataString);
+            String[] clientArr = client_url.split(":");
+            if (IS_SERVER) {
+                String key = clientArr[0];
+                putNatMap(key, clientArr[1] + ":" + url);
+            }
+        }catch (Exception e){
+        }finally {
+            ds.close();
         }
-        //关闭接收端
-        ds.close();
     }
 
     private void putNatMap(String key, String value) {

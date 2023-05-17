@@ -8,6 +8,8 @@ spring:
     password: 656803
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: org.postgresql.Driver
+#服务端公网地址
 tarurl: 43.137.43.142:5001
 isserver: false
+#客户端连接唯一键值
 key: spike
