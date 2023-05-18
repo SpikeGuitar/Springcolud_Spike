@@ -51,8 +51,6 @@ public class NatSchedule {
 
     public static Map<String, Object> NAT_MAP = new HashMap<>();
 
-//    public boolean SUCCESS_CONNECTED = Boolean.FALSE;
-
     //每1分钟执行一次
     @Scheduled(cron = "0/15 * * * * ?")
     private void SendUdp() throws IOException {
@@ -94,8 +92,10 @@ public class NatSchedule {
             if (receive.contains("client")) {
                 String msg = "****************************打洞成功****************************";
                 log.info(msg);
+            }else {
+                log.info("*************************** upd信息开始 ***************************\n {}", receive);
+                log.info("*************************** upd信息结束 ***************************");
             }
-            log.info("upd传输信息为: {}", receive);
         }
     }
 
