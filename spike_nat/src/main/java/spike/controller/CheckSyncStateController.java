@@ -20,6 +20,9 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static spike.schedule.NatSchedule.SEND_SOCKET;
+import static spike.schedule.NatSchedule.sendUdp;
+
 /**
  * @PACKAGE_NAME: com.example.controller
  * @NAME: CheckSyncState
@@ -31,7 +34,7 @@ import java.net.URL;
 @RestController
 @RequestMapping("Nat")
 public class CheckSyncStateController {
-    
+
     /**
      * 查询程序运行状态
      */
@@ -59,23 +62,9 @@ public class CheckSyncStateController {
     @ApiOperation(value = "udp打洞", tags = "CheckSyncStateController 检查同步状态")
     @RequestMapping(value = "/sendToUdp", method = RequestMethod.GET)
     public String sendToUdp(@RequestParam(value = "key") String key,@RequestParam(value = "client_ip") String client_ip, @RequestParam(value = "client_port") Integer client_port) throws IOException {
-        sendUdp(key,client_ip, client_port);
+        sendUdp(key.getBytes(),client_ip, client_port,SEND_SOCKET);
+        log.info("GET接口向服务端 {}:{} 发送upd 信息：{}",client_ip,client_port,key);
         return "打洞完成";
-    }
-    
-    public static void sendUdp(String key,String client_ip, Integer client_port) throws IOException {
-        // 1，建立udp的socket服务。
-        DatagramSocket ds = new DatagramSocket(7090);//指定发送端口，这个可以不指定，系统会随机分配。
-        String ipV4 = InetAddress.getLocalHost().getHostAddress();
-        // 2，明确要发送的具体数据。
-        String text = key+":"+ipV4;
-        byte[] buf = text.getBytes();
-        // 3，将数据封装成了数据包。
-        DatagramPacket dp = new DatagramPacket(buf, buf.length, InetAddress.getByName(client_ip), client_port);
-        // 4，用socket服务的send方法将数据包发送出去。
-        ds.send(dp);
-        // 5，关闭资源。
-        ds.close();
     }
 
     public static String doGet(String httpurl) {
