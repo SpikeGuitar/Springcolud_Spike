@@ -36,15 +36,28 @@ import static spike.schedule.NatSchedule.sendUdp;
 public class CheckSyncStateController {
 
     /**
-     * 查询程序运行状态
+     * 查询NAT_MAP
      */
-    @ApiOperation(value = "查询程序运行状态", tags = "CheckSyncStateController 检查同步状态")
+    @ApiOperation(value = "查询NAT_MAP", tags = "Nat Upd打洞")
     @RequestMapping(value = "/getNatMap", method = RequestMethod.GET)
     public Object getSyncState( @RequestParam(required = false, value = "key") String key) {
         if(!key.isEmpty()){
             return NatSchedule.NAT_MAP.get(key);  
         }
         return NatSchedule.NAT_MAP;
+    }
+
+    /**
+     * 清除指定NAT_MAP key
+     */
+    @ApiOperation(value = "清除指定NAT_MAP key", tags = "Nat Upd打洞")
+    @RequestMapping(value = "/clearNatMap", method = RequestMethod.GET)
+    public Object clearNatMap( @RequestParam(required = false, value = "key") String key) {
+        if(NatSchedule.NAT_MAP.get(key)!=null){
+            NatSchedule.NAT_MAP.put(key,null);
+            return NatSchedule.NAT_MAP.get(key);
+        }
+        return NatSchedule.NAT_MAP.get(key);
     }
 
     /**

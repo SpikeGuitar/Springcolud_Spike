@@ -1,6 +1,7 @@
 package spike.schedule;
 
 import com.alibaba.fastjson.JSON;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,47 +51,51 @@ public class NatSchedule {
 
     public static Map<String, Object> NAT_MAP = new HashMap<>();
 
-    public boolean SUCCESS_CONNECTED = Boolean.FALSE;
+//    public boolean SUCCESS_CONNECTED = Boolean.FALSE;
 
     //每1分钟执行一次
     @Scheduled(cron = "0/15 * * * * ?")
     private void SendUdp() throws IOException {
-       sendUpdMsg();
+        sendUpdMsg();
     }
 
     //每1秒钟执行一次
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "*/1 * * * * ?")
     private void receiveUpd() throws IOException {
         receiveUpdMsg();
     }
 
     public void sendUpdMsg() throws IOException {
         if (!IS_SERVER) {
-            if(SEND_SOCKET==null) {
+            if (SEND_SOCKET == null) {
+                //清除key值
+                doGet("http://" + TAR_URL + "/Nat/clearNatMap?key=" + KEY);
                 SEND_SOCKET = new DatagramSocket();
-                SEND_SOCKET.setSoTimeout(2000);
-                sendUpdToServer();
-            }
-            byte[] bytes = new byte[1024];
-            DatagramPacket packet1 = new DatagramPacket(bytes, bytes.length);
-            try {
-                SEND_SOCKET.receive(packet1);
-            }catch (IOException e){
-                SUCCESS_CONNECTED = Boolean.FALSE;
-            }
-            String receive = new String(bytes, 0, packet1.getLength());
-            if (receive.contains("client")) {
-                log.info(receive);
-                String msg ="****************************打洞成功****************************";
-                log.info(msg);
-                SUCCESS_CONNECTED = Boolean.TRUE;
-                SEND_SOCKET.setSoTimeout(15000);
-            }
-            if(!SUCCESS_CONNECTED){
-                log.info("upd 接收信息:{}",receive);
-                SEND_SOCKET.setSoTimeout(1000);
+                Thread thread = new Thread() {
+                    @SneakyThrows
+                    @Override
+                    public void run() {
+                        log.info("开始接收upd请求");
+                        responseSend();
+                    }
+                };
+                thread.start();
             }
             sendUpdToServer();
+        }
+    }
+
+    private void responseSend() throws IOException {
+        byte[] bytes = new byte[1024];
+        DatagramPacket packet1 = new DatagramPacket(bytes, bytes.length);
+        while (true) {
+            SEND_SOCKET.receive(packet1);
+            String receive = new String(bytes, 0, packet1.getLength());
+            if (receive.contains("client")) {
+                String msg = "****************************打洞成功****************************";
+                log.info(msg);
+            }
+            log.info("upd传输信息为: {}", receive);
         }
     }
 
@@ -99,39 +105,40 @@ public class NatSchedule {
         // 客户段发送upd请求到服务端(服务端记录 客户端内网ip/外网ip/外网端口)
         String text = KEY + ":" + ipV4 + ":" + SEND_SOCKET.getLocalPort();
         byte[] buf = text.getBytes();
-        if(!SUCCESS_CONNECTED) {
-            sendUdp(buf, ipArr[0], RECEIVE_PORT, SEND_SOCKET);
-        }
+        sendUdp(buf, ipArr[0], RECEIVE_PORT, SEND_SOCKET);
         //查询 相同key的两个客户段nat信息
         String result = doGet("http://" + TAR_URL + "/Nat/getNatMap?key=" + KEY);
+        if (result.isEmpty()) {
+            return;
+        }
         List<String> list = JSON.parseObject(result, List.class);
         // 相同key 需要nat穿透的ip数组
-        log.info(JSON.toJSONString(list));
+        log.info("键值：{} 下穿透ip数组 {}", KEY, JSON.toJSONString(list));
         String client = "";
         for (String str : list) {
             if (str == null || str.isEmpty()) {
                 continue;
             }
             String[] strArr = str.split(":");
-            if (strArr[0].equals(ipV4)){
-                client =str;
+            if (strArr[0].equals(ipV4)) {
+                client = str;
             }
             if (!strArr[0].equals(ipV4)) {
                 //upd打洞
                 String[] udpArr = str.split("/")[1].split(":");
                 log.info("upd打洞 ip{} : 端口{}", udpArr[0], Integer.valueOf(udpArr[1]));
                 // 2，明确要发送的具体数据。
-                String clientMsg = "来自 client "+client+" upd 信息";
+                String clientMsg = "来自 client " + client + " upd 信息";
                 byte[] data = clientMsg.getBytes();
-                sendUdp(data, udpArr[0], Integer.valueOf(udpArr[1]),SEND_SOCKET);
+                sendUdp(data, udpArr[0], Integer.valueOf(udpArr[1]), SEND_SOCKET);
             }
         }
     }
 
-    public static void sendUdp(byte[] data,String ip,int port,DatagramSocket datagramSocket) throws IOException {
+    public static void sendUdp(byte[] data, String ip, int port, DatagramSocket datagramSocket) throws IOException {
         // 3，将数据封装成了数据包。
         DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName(ip), port);
-        log.info("向服务端" + ip + ":"+port+"发送upd 信息");
+        log.info("向服务端" + ip + ":" + port + "发送upd 信息");
         datagramSocket.send(packet);
     }
 
@@ -146,7 +153,7 @@ public class NatSchedule {
             byte[] bytes = new byte[1024];
             DatagramPacket dp = new DatagramPacket(bytes, bytes.length);
             //DatagramSocket(int port)构造数据报套接字并将其绑定到本地主机上的指定端口
-            if(RECEIVE_SOCKET==null) {
+            if (RECEIVE_SOCKET == null) {
                 RECEIVE_SOCKET = new DatagramSocket(RECEIVE_PORT);
             }
             DatagramSocket ds = RECEIVE_SOCKET;
@@ -160,16 +167,13 @@ public class NatSchedule {
             //int getLength()返回要发送的数据的长度或接收到的数据的长度
             int length = dp.getLength();
             String dataString = new String(data, 0, length);
-            log.info("\n客户端Nat地址： **** {}**** \n客户端内网地址： **** {} **** ", url, dataString);
+            log.info("\n客户端Nat地址：  **** {}**** \n客户端内网地址： **** {} **** ", url, dataString);
             String[] clientArr = dataString.split(":");
             if (IS_SERVER) {
                 String key = clientArr[0];
                 putNatMap(key, clientArr[1] + ":" + clientArr[2] + "/" + url);
+                log.info("key :{} 映射数组更新完成", KEY);
             }
-            log.info("返回同一个key下面需要穿透的内网对象");
-            String returnData = JSON.toJSONString(NAT_MAP.get(KEY));
-            sendUdp(returnData.getBytes(),address.getHostAddress(),port,RECEIVE_SOCKET);
-            log.info("返回key：{}完成",KEY);
         }
     }
 
