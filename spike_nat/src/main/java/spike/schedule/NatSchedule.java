@@ -46,7 +46,7 @@ public class NatSchedule {
     @Value("${receiveport}")
     private Integer RECEIVE_PORT;
 
-    private static DatagramSocket RECEIVE_SOCKET = null;
+    public static DatagramSocket RECEIVE_SOCKET = null;
     public static DatagramSocket SEND_SOCKET = null;
 
     public static Map<String, Object> NAT_MAP = new HashMap<>();
@@ -89,7 +89,7 @@ public class NatSchedule {
         DatagramPacket packet1 = new DatagramPacket(bytes, bytes.length);
         while (true) {
             SEND_SOCKET.receive(packet1);
-            String receive = new String(bytes, 0, packet1.getLength());
+            String receive = new String(bytes, 0, packet1.getLength(), "utf-8");
             if (receive.contains("client")) {
                 String msg = "****************************打洞成功****************************";
                 log.info(msg);

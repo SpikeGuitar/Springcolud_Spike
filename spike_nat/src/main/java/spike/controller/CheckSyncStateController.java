@@ -3,6 +3,7 @@ package spike.controller;
 
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,13 +14,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static spike.schedule.NatSchedule.RECEIVE_SOCKET;
 import static spike.schedule.NatSchedule.SEND_SOCKET;
 import static spike.schedule.NatSchedule.sendUdp;
 
@@ -35,14 +35,17 @@ import static spike.schedule.NatSchedule.sendUdp;
 @RequestMapping("Nat")
 public class CheckSyncStateController {
 
+    @Value("${isserver}")
+    private boolean IS_SERVER;
+
     /**
      * 查询NAT_MAP
      */
     @ApiOperation(value = "查询NAT_MAP", tags = "Nat Upd打洞")
     @RequestMapping(value = "/getNatMap", method = RequestMethod.GET)
-    public Object getSyncState( @RequestParam(required = false, value = "key") String key) {
-        if(!key.isEmpty()){
-            return NatSchedule.NAT_MAP.get(key);  
+    public Object getSyncState(@RequestParam(required = false, value = "key") String key) {
+        if (!key.isEmpty()) {
+            return NatSchedule.NAT_MAP.get(key);
         }
         return NatSchedule.NAT_MAP;
     }
@@ -52,9 +55,9 @@ public class CheckSyncStateController {
      */
     @ApiOperation(value = "清除指定NAT_MAP key", tags = "Nat Upd打洞")
     @RequestMapping(value = "/clearNatMap", method = RequestMethod.GET)
-    public Object clearNatMap( @RequestParam(required = false, value = "key") String key) {
-        if(NatSchedule.NAT_MAP.get(key)!=null){
-            NatSchedule.NAT_MAP.put(key,null);
+    public Object clearNatMap(@RequestParam(required = false, value = "key") String key) {
+        if (NatSchedule.NAT_MAP.get(key) != null) {
+            NatSchedule.NAT_MAP.put(key, null);
             return NatSchedule.NAT_MAP.get(key);
         }
         return NatSchedule.NAT_MAP.get(key);
@@ -74,9 +77,15 @@ public class CheckSyncStateController {
      */
     @ApiOperation(value = "udp打洞", tags = "CheckSyncStateController 检查同步状态")
     @RequestMapping(value = "/sendToUdp", method = RequestMethod.GET)
-    public String sendToUdp(@RequestParam(value = "key") String key,@RequestParam(value = "client_ip") String client_ip, @RequestParam(value = "client_port") Integer client_port) throws IOException {
-        sendUdp(key.getBytes(),client_ip, client_port,SEND_SOCKET);
-        log.info("GET接口向服务端 {}:{} 发送upd 信息：{}",client_ip,client_port,key);
+    public String sendToUdp(@RequestParam(value = "key") String key, @RequestParam(value = "client_ip") String client_ip, @RequestParam(value = "client_port") Integer client_port) throws IOException {
+        DatagramSocket datagramSocket;
+        if (IS_SERVER) {
+            datagramSocket = RECEIVE_SOCKET;
+        } else {
+            datagramSocket = SEND_SOCKET;
+        }
+        sendUdp(key.getBytes(), client_ip, client_port, datagramSocket);
+        log.info("GET接口向服务端 {}:{} 发送upd 信息：{}", client_ip, client_port, key);
         return "打洞完成";
     }
 
