@@ -8,11 +8,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +52,8 @@ public class NatSchedule {
     public static Map<String, Object> NAT_MAP = new HashMap<>();
 
     //每1分钟执行一次
-    @Scheduled(cron = "0/15 * * * * ?")
+    @PostConstruct
+    @Scheduled(cron = "0/60 * * * * ?")
     private void SendUdp() throws IOException {
         sendUpdMsg();
     }
@@ -68,7 +69,7 @@ public class NatSchedule {
             if (SEND_SOCKET == null) {
                 //清除key值
                 doGet("http://" + TAR_URL + "/Nat/clearNatMap?key=" + KEY);
-                SEND_SOCKET = new DatagramSocket();
+                SEND_SOCKET = new DatagramSocket(SEND_PORT);
                 Thread thread = new Thread() {
                     @SneakyThrows
                     @Override
@@ -126,7 +127,6 @@ public class NatSchedule {
             if (!strArr[0].equals(ipV4)) {
                 //upd打洞
                 String[] udpArr = str.split("/")[1].split(":");
-                log.info("upd打洞 ip{} : 端口{}", udpArr[0], Integer.valueOf(udpArr[1]));
                 // 2，明确要发送的具体数据。
                 String clientMsg = "来自 client " + client + " upd 信息";
                 byte[] data = clientMsg.getBytes();

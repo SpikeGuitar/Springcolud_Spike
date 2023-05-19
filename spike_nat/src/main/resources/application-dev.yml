@@ -13,5 +13,5 @@ tarurl: 43.137.43.142:5001
 isserver: false
 #客户端连接唯一键值
 key: spike
-sendport: 7090
+sendport: 5001
 receiveport : 7091
