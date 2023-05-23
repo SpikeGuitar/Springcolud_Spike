@@ -1,0 +1,10 @@
+server:
+  port: 5001
+#开发环境
+spring:
+  datasource:
+    url: jdbc:postgresql://xxx.xxx.xx.xxx:5432/postgres?useUnicode=true&&characterEncoding=utf-8&useSSL=false
+    username: xxxx
+    password: xxxxxx
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.postgresql.Driver
