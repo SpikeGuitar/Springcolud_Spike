@@ -5,12 +5,15 @@ import com.spike.util.Service.UtilService;
 import com.spike.util.Util.QRCodeUtil;
 import com.spike.util.UtilClass.ResponseResult;
 import com.spike.util.entry.Person;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -289,6 +292,18 @@ public class UtilController {
         map.put("msg", "获取二维码成功");
         map.put("imagePath", path);
         return this.getResponseResult(map, SUCCESS);
+    }
+
+    @ApiOperation(value = "文件下载接口", tags = "PublicFunctionController 公共函数")
+    @RequestMapping(value = "/FileDownload", method = RequestMethod.POST)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "map", value = "{\n" +
+                    "    \"url\":\"http://43.137.43.142/img/20230407124256_cldas.png\",\n" +
+                    "    \"fileName\":\"测试干旱.gif\"\n" +
+                    "}", paramType = "body")
+    })
+    public void fileDownload(@RequestBody Map<String, Object> resMap, HttpServletResponse response) throws Exception {
+        utilService.newFileDownload(resMap,response);
     }
 
 }

@@ -24,4 +24,6 @@ public interface UtilService {
     List<Map<String, Object>> getUpdateExcel(MultipartFile file);
 
     List<String> generalImport(String schemaCode, MultipartFile file, String userId, String schemeNo, String remarkNo, String type, String informationType);
+
+    void newFileDownload(Map<String, Object> resMap, HttpServletResponse response) throws Exception;
 }

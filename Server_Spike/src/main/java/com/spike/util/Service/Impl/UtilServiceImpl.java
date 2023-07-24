@@ -25,9 +25,12 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,6 +54,9 @@ public class UtilServiceImpl implements UtilService {
     private JdbcTemplate jdbcTemplate;
 
     private static String ANCHOR_POINT = "第.*行导入校验错误,错误信息为：";
+
+    String URL = "url";
+    String FILE_NAME = "fileName";
 
     @Value("${spring.lvBaseData.driver-class-name}")
     String driverClass;
@@ -389,6 +395,52 @@ public class UtilServiceImpl implements UtilService {
             }
         }
         return msgList;
+    }
+    
+    @Override
+    public void newFileDownload(Map<String, Object> map, HttpServletResponse response) throws Exception {
+        //照片URL
+        String imageUrl = map.get(URL).toString();
+        String fileName = map.get(FILE_NAME).toString();
+        URL url = new URL(imageUrl);
+        DataInputStream dis = null;
+        OutputStream out = null;
+        //打开网络输入流
+        try {
+            dis = new DataInputStream(url.openStream());
+            //建立一个新的文件
+            out = getOutputStream(fileName, response);
+            byte[] buffer = new byte[1024];
+            int length;
+            //开始填充数据
+            while((length = dis.read(buffer))>0){
+                out.write(buffer,0,length);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            dis.close();
+            out.close();
+        }
+    }
+
+    /**
+     * 获取response输出流
+     *
+     * @param fileName 文件名
+     * @param response 响应体
+     * @return OutputStream
+     */
+    private static OutputStream getOutputStream(String fileName, HttpServletResponse response) throws Exception {
+        try {
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+            response.setContentType("octets/stream");
+            response.setHeader("Content-disposition", "attachment;filename=" + fileName + ";" + "filename*=utf-8''" + fileName);
+            return response.getOutputStream();
+        } catch (IOException e) {
+            log.error("文件输出流异常！文件名：{}", fileName, e);
+            throw e;
+        }
     }
 
     /**
